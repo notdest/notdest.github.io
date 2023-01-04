@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Калькулятор долёта</title>
 	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<script type="text/javascript" src="js/plotly-2.17.0.min.js"></script>
 	<script type="text/javascript">
 		function calculate(){
 			let rampAngle 		= Number(document.getElementById('rampAngle').value);
@@ -40,6 +41,64 @@
 			document.getElementById('result_hit').innerText	= hit.toFixed(1) + " м";
 			document.getElementById('result_t').innerText	= t.toFixed(1) + " с";
 			document.getElementById('result_vf').innerText	= (finalSpeed*3.6).toFixed(1) + " км/ч";
+
+
+			// ------------------ Далее отрисовываем график ---------------------------
+			let steps 	= 30;
+			let xs = [], ys = [], xsFoot = [], ysFoot = [], tmpX, curAngle;
+			for(let i = 0; i <= steps; i++){
+				tmpX 		= (i/steps)*x;
+				xs.push( -Math.sin(rampAngle)*centerHeight + tmpX);
+				ys.push(Math.tan(rampAngle)*tmpX - (G/2)*((tmpX**2)/((V*Math.cos(rampAngle))**2)) + Math.cos(rampAngle)*centerHeight);
+
+				curAngle	= rampAngle + (tmpX/x)*(-landingAngle - rampAngle);
+				xsFoot.push(xs.at(-1) + Math.sin(curAngle)*centerHeight);
+				ysFoot.push(ys.at(-1) - Math.cos(curAngle)*centerHeight)
+			}
+
+			let trajectoryCG = {
+				x: xs,
+				y: ys,
+				mode: 'lines',
+				name: 'ЦТ',
+				line: {
+					shape: 'spline',
+					dash: 'dot',
+					color: 'rgb(92, 170, 255)',
+					width: 2,
+				},
+			};
+
+			let trajectoryFoot = {
+				x: xsFoot,
+				y: ysFoot,
+				name: 'Подошва',
+				mode: 'lines',
+				line: {
+					shape: 'spline',
+					color: 'rgb(92, 170, 255)',
+				},
+			};
+
+			let landing = {
+				x: [landingDistance - Math.cos(landingAngle)*0.55, landingDistance, landingDistance + Math.cos(landingAngle)*0.55],
+				y: [landingLevel + Math.sin(landingAngle)*0.55, landingLevel, landingLevel - Math.sin(landingAngle)*0.55],
+				mode: 'lines',
+				name: 'Приземление',
+				line: {
+					color: 'rgb(243, 71, 5)',
+				},
+			}
+
+			let layout = {
+				title:"Траектория полёта",
+				yaxis: {
+					scaleanchor: "x",
+					scaleratio: 1,
+				}
+			};
+
+			Plotly.newPlot("chart", [trajectoryCG, trajectoryFoot, landing], layout );
 		}
 	</script>
 </head>
@@ -79,8 +138,9 @@
 	<div class="mt-3"> Минимальная скорость у основания: <span id="result_vo"></span></div>
 	<div class="mt-3"> Удар в ноги: <span id="result_hit"></span></div>
 	<div class="mt-3"> Скорость перед приземлением: <span id="result_vf"></span></div>
-	<div class="mt-3"> Время полёта: <span id="result_t"></span></div>
+	<div class="mt-3 mb-3"> Время полёта: <span id="result_t"></span></div>
 
+	<div id="chart" class="mb-5"></div>
 </div>
 <script src="js/bootstrap.bundle.min.js"></script>
 </body>
