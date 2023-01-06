@@ -1,172 +1,216 @@
 <!doctype html>
 <html lang="ru">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Калькулятор долёта</title>
-	<link href="css/bootstrap.min.css" rel="stylesheet">
-	<script type="text/javascript" src="js/plotly-2.17.0.min.js"></script>
-	<script type="text/javascript" src="js/plotly-locale-ru-latest.js"></script>
-	<script type="text/javascript">
-		window.addEventListener("orientationchange", function() {
-			setTimeout(calculate, 100);
-		}, false);
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Калькулятор трамплина</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="js/plotly-2.17.0.min.js"></script>
+    <script type="text/javascript" src="js/plotly-locale-ru-latest.js"></script>
+    <script type="text/javascript">
+        window.addEventListener("orientationchange", function() {
+            setTimeout(calculate, 100);
+        }, false);
 
-		function calculate(){
-			let rampAngle 		= Number(document.getElementById('rampAngle').value);
-			let landingAngle 	= Number(document.getElementById('landingAngle').value);
-			let landingDistance	= Number(document.getElementById('landingDistance').value);
-			let landingLevel 	= Number(document.getElementById('landingLevel').value);
-			let rampHeight 		= Number(document.getElementById('rampHeight').value);
-			let centerHeight 	= Number(document.getElementById('centerHeight').value);
+        function calculate(){
+            let rampAngle 		= Number(document.getElementById('rampAngle').value);
+            let landingAngle 	= Number(document.getElementById('landingAngle').value);
+            let landingDistance	= Number(document.getElementById('landingDistance').value);
+            let landingLevel 	= Number(document.getElementById('landingLevel').value);
+            let rampHeight 		= Number(document.getElementById('rampHeight').value);
+            let centerHeight 	= Number(document.getElementById('centerHeight').value);
 
-			rampAngle 		= rampAngle*Math.PI/180;
-			landingAngle 	= landingAngle*Math.PI/180;
+            rampAngle 		= rampAngle*Math.PI/180;
+            landingAngle 	= landingAngle*Math.PI/180;
 
-			// центр тежести пролетает чуть больший путь, траекторию ищем для него
-			let x = landingDistance + Math.sin(rampAngle)*centerHeight + Math.sin(landingAngle)*centerHeight;
-			let y = landingLevel 	- Math.cos(rampAngle)*centerHeight + Math.cos(landingAngle)*centerHeight;
+            // центр тежести пролетает чуть больший путь, траекторию ищем для него
+            let x = landingDistance + Math.sin(rampAngle)*centerHeight + Math.sin(landingAngle)*centerHeight;
+            let y = landingLevel 	- Math.cos(rampAngle)*centerHeight + Math.cos(landingAngle)*centerHeight;
 
-			let G = 9.807;
-			// Сначала вычислим время, через падение с высоты, мне так проще
-			let h = x * Math.tan(rampAngle) - y ;  	// Высота от точки приземления, до точки где мы оказались бы без гравитации
-			let t = Math.sqrt(2*h/G);				// Время падения с этой высоты, оно же общее время полёта
-			// Потом из времени скорость
-			let V = (x/t)/Math.cos(rampAngle);		// требуемую горизонтальную скорость делим на cos, получаем скорость на кромке
+            let G = 9.807;
+            // Сначала вычислим время, через падение с высоты, мне так проще
+            let h = x * Math.tan(rampAngle) - y ;  	// Высота от точки приземления, до точки где мы оказались бы без гравитации
+            let t = Math.sqrt(2*h/G);				// Время падения с этой высоты, оно же общее время полёта
+            // Потом из времени скорость
+            let V = (x/t)/Math.cos(rampAngle);		// требуемую горизонтальную скорость делим на cos, получаем скорость на кромке
 
-			let footV = Math.sqrt(V**2 + 2*G*rampHeight);	// Скорость у основания - добавили энергию чтобы забраться на трамплин
-			let finalSpeed	= Math.sqrt( (V*Math.cos(rampAngle))**2 + (V*Math.sin(rampAngle) - G*t)**2 );
+            let footV = Math.sqrt(V**2 + 2*G*rampHeight);	// Скорость у основания - добавили энергию чтобы забраться на трамплин
+            let finalSpeed	= Math.sqrt( (V*Math.cos(rampAngle))**2 + (V*Math.sin(rampAngle) - G*t)**2 );
 
-			let finalAngle 	= Math.atan((V*Math.sin(rampAngle) - G*t)/(V*Math.cos(rampAngle))) ;	//угол полёта в конце
-			let hitSpeed 	= finalSpeed * Math.sin( -finalAngle - landingAngle );	// скорость по нормали к приземлению
-			let hit	= (hitSpeed**2/(2*G)) *(2/(3-Math.cos(landingAngle))) // вычисляем высоту падения, и корректируем с учетом угла силы тяжести
+            let finalAngle 	= Math.atan((V*Math.sin(rampAngle) - G*t)/(V*Math.cos(rampAngle))) ;	//угол полёта в конце
+            let hitSpeed 	= finalSpeed * Math.sin( -finalAngle - landingAngle );	// скорость по нормали к приземлению
+            let hit	= (hitSpeed**2/(2*G)) *(2/(3-Math.cos(landingAngle))) // вычисляем высоту падения, и корректируем с учетом угла силы тяжести
 
-			document.getElementById('result_v').innerText	= (V*3.6).toFixed(1) + " км/ч";
-			document.getElementById('result_vo').innerText	= (footV*3.6).toFixed(1) + " км/ч";
-			document.getElementById('result_hit').innerText	= hit.toFixed(1) + " м";
-			document.getElementById('result_t').innerText	= t.toFixed(1) + " с";
-			document.getElementById('result_vf').innerText	= (finalSpeed*3.6).toFixed(1) + " км/ч";
+            document.getElementById('result_v').innerText	= (V*3.6).toFixed(1) + " км/ч";
+            document.getElementById('result_vo').innerText	= (footV*3.6).toFixed(1) + " км/ч";
+            document.getElementById('result_hit').innerText	= hit.toFixed(1) + " м";
+            document.getElementById('result_t').innerText	= t.toFixed(1) + " с";
+            document.getElementById('result_vf').innerText	= (finalSpeed*3.6).toFixed(1) + " км/ч";
 
 
-			// ------------------ Далее отрисовываем график ---------------------------
-			let steps 	= 30;
-			let xs = [], ys = [], xsFoot = [], ysFoot = [], tmpX, curAngle;
-			for(let i = 0; i <= steps; i++){
-				tmpX 		= (i/steps)*x;
-				xs.push( -Math.sin(rampAngle)*centerHeight + tmpX);
-				ys.push(Math.tan(rampAngle)*tmpX - (G/2)*((tmpX**2)/((V*Math.cos(rampAngle))**2)) + Math.cos(rampAngle)*centerHeight);
+            // ------------------ Далее отрисовываем график ---------------------------
+            let steps 	= 30;
+            let xs = [], ys = [], xsFoot = [], ysFoot = [], tmpX, curAngle;
+            for(let i = 0; i <= steps; i++){
+                tmpX 		= (i/steps)*x;
+                xs.push( -Math.sin(rampAngle)*centerHeight + tmpX);
+                ys.push(Math.tan(rampAngle)*tmpX - (G/2)*((tmpX**2)/((V*Math.cos(rampAngle))**2)) + Math.cos(rampAngle)*centerHeight);
 
-				curAngle	= rampAngle + (tmpX/x)*(-landingAngle - rampAngle);
-				xsFoot.push(xs.at(-1) + Math.sin(curAngle)*centerHeight);
-				ysFoot.push(ys.at(-1) - Math.cos(curAngle)*centerHeight)
-			}
+                curAngle	= rampAngle + (tmpX/x)*(-landingAngle - rampAngle);
+                xsFoot.push(xs.at(-1) + Math.sin(curAngle)*centerHeight);
+                ysFoot.push(ys.at(-1) - Math.cos(curAngle)*centerHeight)
+            }
 
-			let trajectoryCG = {
-				x: xs,
-				y: ys,
-				mode: 'lines',
-				name: 'ЦТ',
-				line: {
-					shape: 'spline',
-					dash: 'dot',
-					color: 'rgb(92, 170, 255)',
-					width: 2,
-				},
-			};
+            let trajectoryCG = {
+                x: xs,
+                y: ys,
+                mode: 'lines',
+                name: 'ЦТ',
+                line: {
+                    shape: 'spline',
+                    dash: 'dot',
+                    color: 'rgb(92, 170, 255)',
+                    width: 2,
+                },
+            };
 
-			let trajectoryFoot = {
-				x: xsFoot,
-				y: ysFoot,
-				name: 'Подошва',
-				mode: 'lines',
-				line: {
-					shape: 'spline',
-					color: 'rgb(92, 170, 255)',
-				},
-			};
+            let trajectoryFoot = {
+                x: xsFoot,
+                y: ysFoot,
+                name: 'Подошва',
+                mode: 'lines',
+                line: {
+                    shape: 'spline',
+                    color: 'rgb(92, 170, 255)',
+                },
+            };
 
-			let landing = {
-				x: [landingDistance - Math.cos(landingAngle)*0.55, landingDistance, landingDistance + Math.cos(landingAngle)*0.55],
-				y: [landingLevel + Math.sin(landingAngle)*0.55, landingLevel, landingLevel - Math.sin(landingAngle)*0.55],
-				mode: 'lines',
-				name: 'Приземление',
-				showlegend: false,
-				line: {
-					color: 'rgb(243, 71, 5)',
-				},
-			}
+            let landing = {
+                x: [landingDistance - Math.cos(landingAngle)*0.55, landingDistance, landingDistance + Math.cos(landingAngle)*0.55],
+                y: [landingLevel + Math.sin(landingAngle)*0.55, landingLevel, landingLevel - Math.sin(landingAngle)*0.55],
+                mode: 'lines',
+                name: 'Приземление',
+                showlegend: false,
+                line: {
+                    color: 'rgb(243, 71, 5)',
+                },
+            }
 
-			let width	= document.getElementById('mainContainer').scrollWidth;
-			let layout = {
-				title:"Траектория полёта",
-				width: width,
-				height: width,
-				yaxis: {
-					scaleanchor: "x",
-					scaleratio: 1,
-				},
-				dragmode: "pan",
-				legend: {"orientation": "h"},
-				margin: {
-					'l': 30,
-					'r': 10,
-					't': 40,
-					'b': 20,
-				},
-			};
+            let width	= document.getElementById('mainContainer').scrollWidth;
+            let layout = {
+                title:"Траектория полёта",
+                width: width,
+                height: width,
+                yaxis: {
+                    scaleanchor: "x",
+                    scaleratio: 1,
+                },
+                dragmode: "pan",
+                legend: {"orientation": "h"},
+                margin: {
+                    'l': 30,
+                    'r': 10,
+                    't': 40,
+                    'b': 20,
+                },
+            };
 
-			let config = {
-				scrollZoom: true,
-				locale: 'ru',
-				displaylogo: false,
-				responsive: true,
-			}
+            let config = {
+                scrollZoom: true,
+                locale: 'ru',
+                displaylogo: false,
+                responsive: true,
+            }
 
-			Plotly.newPlot("chart", [trajectoryCG, trajectoryFoot, landing], layout ,config);
-		}
-	</script>
+            Plotly.newPlot("chart", [trajectoryCG, trajectoryFoot, landing], layout ,config);
+        }
+    </script>
+
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript" >
+        (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+        (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+        ym(91957766, "init", {
+            clickmap:true,
+            trackLinks:true,
+            accurateTrackBounce:true,
+            webvisor:true
+        });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/91957766" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
 </head>
 <body class="bg-light" onload="calculate()">
 <div class="container-sm" id="mainContainer">
-	<h1>Вычислить скорость</h1>
-	<form>
-		<div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-			<label for="rampAngle" class="form-label">Угол вылета в градусах</label>
-			<input type="number" class="form-control" id="rampAngle" value="54">
-		</div>
-		<div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-			<label for="landingAngle" class="form-label">Угол приземления в градусах</label>
-			<input type="number" class="form-control" id="landingAngle" value="20">
-		</div>
-		<div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-			<label for="landingDistance" class="form-label">Расстояние по горизонтали от вылета до приземления, метры</label>
-			<input type="number" class="form-control" id="landingDistance" value="5">
-		</div>
-		<div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-			<label for="landingLevel" class="form-label">Высота точки приземления относительно точки вылета, метры</label>
-			<input type="number" class="form-control" id="landingLevel" value="-1">
-			<div class="form-text">Отрицательно если приземление ниже</div>
-		</div>
-		<div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-			<label for="rampHeight" class="form-label">Высота кромки вылета над основанием, где измеряем скорость, метры</label>
-			<input type="number" class="form-control" id="rampHeight" value="2">
-		</div>
-		<div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-			<label for="centerHeight" class="form-label">Высота центра тяжести от покрытия(м)</label>
-			<input type="number" class="form-control" id="centerHeight" value="1">
-		</div>
-		<button type="button" class="btn btn-primary" onclick="calculate();">Вычислить</button>
-	</form>
+    <h1>Калькулятор трамплина</h1>
+    <p>Данный калькулятор для указанного трамплина вычисляет необходимую скорость, силу удара на приземлении и некоторые
+    параметры полёта.</p>
+    <h2>Ввод параметров</h2>
+    <form>
+        <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
+            <label for="rampAngle" class="form-label">Угол вылета в градусах</label>
+            <input type="number" class="form-control" id="rampAngle" value="54">
+        </div>
+        <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
+            <label for="landingAngle" class="form-label">Угол приземления в градусах</label>
+            <input type="number" class="form-control" id="landingAngle" value="20">
+        </div>
+        <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
+            <label for="landingDistance" class="form-label">Расстояние по горизонтали от вылета до приземления, метры</label>
+            <input type="number" class="form-control" id="landingDistance" value="5">
+        </div>
+        <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
+            <label for="landingLevel" class="form-label">Высота точки приземления относительно точки вылета, метры</label>
+            <input type="number" class="form-control" id="landingLevel" value="-1">
+            <div class="form-text">Отрицательно если приземление ниже</div>
+        </div>
+        <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
+            <label for="rampHeight" class="form-label">Высота кромки вылета над основанием, где измеряем скорость, метры</label>
+            <input type="number" class="form-control" id="rampHeight" value="2">
+        </div>
+        <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
+            <label for="centerHeight" class="form-label">Высота центра тяжести от покрытия(м)</label>
+            <input type="number" class="form-control" id="centerHeight" value="1">
+        </div>
+        <button type="button" class="btn btn-primary" onclick="calculate();">Вычислить</button>
+    </form>
 
-	<h2 class="mt-4">Результаты</h2>
+    <h2 class="mt-4">Результаты</h2>
 
-	<div class="mt-3"> Минимальная скорость на кромке: <span id="result_v"></span></div>
-	<div class="mt-3"> Минимальная скорость у основания: <span id="result_vo"></span></div>
-	<div class="mt-3"> Удар в ноги: <span id="result_hit"></span></div>
-	<div class="mt-3"> Скорость перед приземлением: <span id="result_vf"></span></div>
-	<div class="mt-3 mb-3"> Время полёта: <span id="result_t"></span></div>
+    <div class="mt-3"> Минимальная скорость на кромке: <span id="result_v"></span></div>
+    <div class="mt-3"> Минимальная скорость у основания: <span id="result_vo"></span></div>
+    <div class="mt-3"> Удар в ноги: <span id="result_hit"></span></div>
+    <div class="mt-3"> Скорость перед приземлением: <span id="result_vf"></span></div>
+    <div class="mt-3 mb-3"> Время полёта: <span id="result_t"></span></div>
 
-	<div id="chart" class="mb-5"></div>
+    <div id="chart" class="mb-5"></div>
+
+    <h2 class="mt-4">Всякая информация</h2>
+    <p>Калькулятор учитывает только ускорение свободного падения. Аэродинамическое сопротивление дает малый вклад - на
+    полёте в 19м это один метр недолёта. Есть более точный <a href="https://github.com/notdest/jump-trajectory" target="_blank">
+    калькулятор</a> для matlab, там же есть и графики ошибок. В целом калькулятор должен показывать скорость чуть-чуть
+    меньше, чем нужна на самом деле, кроме случаев когда высота ЦТ указана больше реальной, а значит лучше указывать
+    дальнюю из точек, куда хочешь долететь.</p>
+
+    <p>Трамплин можно обмерять лазерной рулеткой с встроенным угломером,только обратить внимание на заявленную
+    точность и диапазоны измерений. В них обычно есть функция Пифагора - замеряешь две точки с неподвижной точкой отсчета,
+    и он показывает расстояние по горизонтали или вертикали</p>
+
+    <p>Высота трамплина указывается только для вычисления скорости у основания. К требуемой скорости на кромке добавляется
+    скорость, необходимая чтобы заехать на высоту трамплина. Учитывается только необходимая потенциальная
+    энергия чтобы заехать. В случае с велосипедом на сухом грунте различие будет небольшое, но у каких-нибудь сноубордов
+    может быть больший вклад трения.</p>
+
+    <p>Удар ноги выводится как эквивалент высоты дропа на плоскач. Он вычисляется как скорость встречи с приземлением
+    по нормали, потом из неё находим эквивалентную высоту. Далее эта высота домножается на коэффициент который нам даёт
+    наклон направления силы тяжести - я прикинул, что приземление с одной и той же скоростью на вертикальную поверхность
+    будет ощущаться в 1.5 раза легче, чем на горизонтальную.</p>
+
+    <p>Проект выложен на <a href="https://github.com/notdest/notdest.github.io" target="_blank">Github</a>.</p>
 </div>
 <script src="js/bootstrap.bundle.min.js"></script>
 </body>
