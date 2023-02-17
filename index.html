@@ -114,7 +114,7 @@
                 line: {
                     shape: 'spline',
                     dash: 'lines',
-                    color: 'rgb(92, 170, 255)',
+                    color: 'rgb(88, 179, 81)',
                     width: 2,
                 },
                 yaxis: 'y2',
@@ -125,10 +125,32 @@
                 grid: {rows: 2, columns: 1, pattern: 'coupled'},
                 title:"Траектория полёта",
                 width: width,
-                height: width,
+                height: 1.5 * width,
+                xaxis: {
+                    title: {
+                        text: "Дистанция(м)",
+                        font: {
+                            size: 14,
+                        },
+                    },
+                },
                 yaxis: {
                     scaleanchor: "x",
                     scaleratio: 1,
+                    title: {
+                        text: "Высота(м)",
+                        font: {
+                            size: 14,
+                        },
+                    },
+                },
+                yaxis2: {
+                    title: {
+                        text: "Скорость(км/ч)",
+                        font: {
+                            size: 14,
+                        },
+                    },
                 },
                 dragmode: "pan",
                 legend: {"orientation": "h"},
