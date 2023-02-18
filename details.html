@@ -46,12 +46,12 @@
                 xs.push( -Math.sin(rampAngle)*centerHeight + tmpX);
                 ys.push(Math.tan(rampAngle)*tmpX - (G/2)*((tmpX**2)/((V*Math.cos(rampAngle))**2)) + Math.cos(rampAngle)*centerHeight);
 
-                curAngle    = rampAngle ;     // TODO: заменить костыль
-                xsFoot.push(xs.at(-1) + Math.sin(curAngle)*centerHeight);
-                ysFoot.push(ys.at(-1) - Math.cos(curAngle)*centerHeight)
-
                 Vvert   = Vvert0 - G*(tmpX/Vhor);
                 speeds.push(Math.sqrt(Vhor**2 + Vvert**2)*3.6 );
+
+                curAngle    = Math.atan(Vvert/Vhor) ;
+                xsFoot.push(xs.at(-1) + Math.sin(curAngle)*centerHeight);
+                ysFoot.push(ys.at(-1) - Math.cos(curAngle)*centerHeight)
             }
 
             let trajectoryCG = {
