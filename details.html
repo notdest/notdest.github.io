@@ -28,10 +28,16 @@
             speed       = speed/3.6;
             speed       = Math.sqrt(speed**2 - 2*G*rampHeight);                     // Падение скорости на трамплине
 
+            let Vhor    = speed * Math.cos(rampAngle);                              // тут смотрим пределы через время
+            let t1      = (Math.sin(rampAngle)*centerHeight + lastX)/Vhor;
+            let Vvert0  = speed * Math.sin(rampAngle);
+            let Hfull   = Math.cos(rampAngle)*centerHeight + Vvert0**2/(2*G) - lastY;
+            let t2      = Vvert0/G + Math.sqrt(2*Hfull/G);
+            let tres    = Math.min(t1,t2)
 
             document.getElementById('result_v').innerText   = (speed*3.6).toFixed(1) + " км/ч";
 
-            drawCharts(rampAngle,centerHeight,lastX,speed);
+            drawCharts(rampAngle,centerHeight,tres*Vhor,speed);
         }
 
         function drawCharts(rampAngle,centerHeight,x,V){
@@ -194,12 +200,12 @@
 
         <br><br>
         <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-            <label for="lastX" class="form-label">Ограничение вычисления по дальности</label>
-            <input type="number" class="form-control" id="lastX" value="10">
+            <label for="lastX" class="form-label">Ограничение вычисления по максимальной дальности ЦТ</label>
+            <input type="number" class="form-control" id="lastX" value="1000">
         </div>
         <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-            <label for="lastY" class="form-label">Ограничение вычисления по высоте</label>
-            <input type="number" class="form-control" id="lastY" value="-1">
+            <label for="lastY" class="form-label">Ограничение вычисления по минимальной высоте ЦТ</label>
+            <input type="number" class="form-control" id="lastY" value="-0.05">
         </div>
         <button type="button" class="btn btn-primary" onclick="calculate();">Вычислить</button>
     </form>
