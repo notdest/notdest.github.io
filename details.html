@@ -40,20 +40,25 @@
             drawCharts(rampAngle,centerHeight,tres*Vhor,speed);
         }
 
-        function drawCharts(rampAngle,centerHeight,x,V){
+        function drawCharts(rampAngle,centerHeight,CMDistance,V){
             let steps   = 30;
-            let xs = [], ys = [], xsFoot = [], ysFoot = [], speeds = [], tmpX, curAngle, Vvert;
+            let xs = [], ys = [], xsFoot = [], ysFoot = [], speeds = [], tmpX, curAngle, Vvert,tmpV;
 
             let Vhor    = V * Math.cos(rampAngle);                              // Горизонтальная и начальная вертикальная скорость
             let Vvert0  = V * Math.sin(rampAngle);
+            let minV    = V;
+            let maxV    = Vhor;
 
             for(let i = 0; i <= steps; i++){
-                tmpX        = (i/steps)*x;
+                tmpX        = (i/steps)*CMDistance;
                 xs.push( -Math.sin(rampAngle)*centerHeight + tmpX);
                 ys.push(Math.tan(rampAngle)*tmpX - (G/2)*((tmpX**2)/((V*Math.cos(rampAngle))**2)) + Math.cos(rampAngle)*centerHeight);
 
                 Vvert   = Vvert0 - G*(tmpX/Vhor);
-                speeds.push(Math.sqrt(Vhor**2 + Vvert**2)*3.6 );
+                tmpV    = Math.sqrt(Vhor**2 + Vvert**2);
+                speeds.push(tmpV*3.6 );
+                minV    = Math.min( minV,tmpV);
+                maxV    = Math.max( maxV,tmpV);
 
                 curAngle    = Math.atan(Vvert/Vhor) ;
                 xsFoot.push(xs.at(-1) + Math.sin(curAngle)*centerHeight);
@@ -77,8 +82,25 @@
                     ay: -20
                 });
                 curT += 0.5;
-            }while(curT*Vhor <= x)
+            }while(curT*Vhor <= CMDistance)
 
+            let annoX   = CMDistance + X0 + 0.1;
+            let H       = Math.ceil(minV**2/(2*G)*2)/2;
+            while(Math.sqrt(2*G*H) <= maxV) {
+                annotations.push({
+                    x: annoX,
+                    y: Math.sqrt(2*G*H) * 3.6,
+                    xref: 'x',
+                    yref: 'y2',
+                    text: H + ' м',
+                    showarrow: true,
+                    arrowhead: 0,
+                    ax: 20,
+                    ay: 0
+                });
+
+                H += 0.5;
+            }
 
             let trajectoryCG = {
                 x: xs,
