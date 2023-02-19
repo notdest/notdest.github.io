@@ -60,6 +60,26 @@
                 ysFoot.push(ys.at(-1) - Math.cos(curAngle)*centerHeight)
             }
 
+            let annotations = [];
+            let curT        = 0;
+            let annoY       = Math.cos(rampAngle)*centerHeight + Vvert0**2/(2*G) + 0.1;
+            let X0          = -Math.sin(rampAngle)*centerHeight;
+            do{                                                                     // надписи с секундами
+                annotations.push({
+                    x: X0 + curT*Vhor ,
+                    y: annoY,
+                    xref: 'x',
+                    yref: 'y',
+                    text: curT + ' сек.',
+                    showarrow: true,
+                    arrowhead: 0,
+                    ax: 0,
+                    ay: -20
+                });
+                curT += 0.5;
+            }while(curT*Vhor <= x)
+
+
             let trajectoryCG = {
                 x: xs,
                 y: ys,
@@ -138,6 +158,8 @@
                     't': 40,
                     'b': 20,
                 },
+
+                annotations: annotations,
             };
 
             let config = {
