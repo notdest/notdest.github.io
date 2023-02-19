@@ -90,7 +90,7 @@
                 annotations.push({
                     x: annoX,
                     y: Math.sqrt(2*G*H) * 3.6,
-                    xref: 'x',
+                    xref: 'x2',
                     yref: 'y2',
                     text: H + ' м',
                     showarrow: true,
@@ -138,11 +138,12 @@
                     width: 2,
                 },
                 yaxis: 'y2',
+                xaxis: 'x2',
             };
 
             let width   = document.getElementById('mainContainer').scrollWidth;
             let layout = {
-                grid: {rows: 2, columns: 1, pattern: 'coupled'},
+                grid: {rows: 2, columns: 1, pattern: 'independent'},
                 title:"Траектория полёта",
                 width: width,
                 height: 1.5 * width,
@@ -159,6 +160,14 @@
                     scaleratio: 1,
                     title: {
                         text: "Высота(м)",
+                        font: {
+                            size: 14,
+                        },
+                    },
+                },
+                xaxis2: {
+                    title: {
+                        text: "Дистанция(м)",
                         font: {
                             size: 14,
                         },
