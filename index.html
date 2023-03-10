@@ -51,24 +51,66 @@
             drawCharts(rampAngle,landingAngle,centerHeight,x,V);
         }
 
-        function drawCharts(rampAngle,landingAngle,centerHeight,x,V){
+        function drawCharts(rampAngle,landingAngle,centerHeight,CMDistance,V){
             let steps   = 30;
-            let xs = [], ys = [], xsFoot = [], ysFoot = [], speeds = [], tmpX, curAngle, Vvert;
+            let xs = [], ys = [], xsFoot = [], ysFoot = [], speeds = [], tmpX, curAngle, Vvert, tmpV;
 
             let Vhor    = V * Math.cos(rampAngle);                              // Горизонтальная и начальная вертикальная скорость
             let Vvert0  = V * Math.sin(rampAngle);
+            let minV    = V;
+            let maxV    = Vhor;
 
             for(let i = 0; i <= steps; i++){
-                tmpX        = (i/steps)*x;
+                tmpX        = (i/steps)*CMDistance;
                 xs.push( -Math.sin(rampAngle)*centerHeight + tmpX);
                 ys.push(Math.tan(rampAngle)*tmpX - (G/2)*((tmpX**2)/((V*Math.cos(rampAngle))**2)) + Math.cos(rampAngle)*centerHeight);
 
-                curAngle    = rampAngle + (tmpX/x)*(-landingAngle - rampAngle);
+                Vvert   = Vvert0 - G*(tmpX/Vhor);
+                tmpV    = Math.sqrt(Vhor**2 + Vvert**2);
+                speeds.push(tmpV*3.6 );
+                minV    = Math.min( minV,tmpV);
+                maxV    = Math.max( maxV,tmpV);
+
+                curAngle    = rampAngle + (tmpX/CMDistance)*(-landingAngle - rampAngle);
                 xsFoot.push(xs.at(-1) + Math.sin(curAngle)*centerHeight);
                 ysFoot.push(ys.at(-1) - Math.cos(curAngle)*centerHeight)
+            }
 
-                Vvert   = Vvert0 - G*(tmpX/Vhor);
-                speeds.push(Math.sqrt(Vhor**2 + Vvert**2)*3.6 );
+            let annotations = [];
+            let curT        = 0;
+            let annoY       = Math.cos(rampAngle)*centerHeight + Vvert0**2/(2*G) + 0.1;
+            let X0          = -Math.sin(rampAngle)*centerHeight;
+            do{                                                                     // надписи с секундами
+                annotations.push({
+                    x: X0 + curT*Vhor ,
+                    y: annoY,
+                    xref: 'x',
+                    yref: 'y',
+                    text: curT + ' сек.',
+                    showarrow: true,
+                    arrowhead: 0,
+                    ax: 0,
+                    ay: -20
+                });
+                curT += 0.5;
+            }while(curT*Vhor <= CMDistance)
+
+            let annoX   = CMDistance + X0 + 0.1;
+            let H       = Math.ceil(minV**2/(2*G)*2)/2;
+            while(Math.sqrt(2*G*H) <= maxV) {
+                annotations.push({
+                    x: annoX,
+                    y: Math.sqrt(2*G*H) * 3.6,
+                    xref: 'x2',
+                    yref: 'y2',
+                    text: H + ' м',
+                    showarrow: true,
+                    arrowhead: 0,
+                    ax: 20,
+                    ay: 0
+                });
+
+                H += 0.5;
             }
 
             let trajectoryCG = {
@@ -118,11 +160,12 @@
                     width: 2,
                 },
                 yaxis: 'y2',
+                xaxis: 'x2',
             };
 
             let width   = document.getElementById('mainContainer').scrollWidth;
             let layout = {
-                grid: {rows: 2, columns: 1, pattern: 'coupled'},
+                grid: {rows: 2, columns: 1, pattern: 'independent'},
                 title:"Траектория полёта",
                 width: width,
                 height: 1.5 * width,
@@ -144,6 +187,14 @@
                         },
                     },
                 },
+                xaxis2: {
+                    title: {
+                        text: "Дистанция(м)",
+                        font: {
+                            size: 14,
+                        },
+                    },
+                },
                 yaxis2: {
                     title: {
                         text: "Скорость(км/ч)",
@@ -160,6 +211,8 @@
                     't': 40,
                     'b': 20,
                 },
+
+                annotations: annotations,
             };
 
             let config = {
