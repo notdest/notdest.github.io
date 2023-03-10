@@ -164,7 +164,20 @@
             };
 
             let width   = document.getElementById('mainContainer').scrollWidth;
-            let layout = {
+            let layout  = getLayout(width, annotations);
+
+            let config = {
+                scrollZoom: true,
+                locale: 'ru',
+                displaylogo: false,
+                responsive: true,
+            }
+
+            Plotly.newPlot("chart", [trajectoryCG, trajectoryFoot, landing,speed], layout ,config);
+        }
+
+        function getLayout(width, annotations){
+            return {
                 grid: {rows: 2, columns: 1, pattern: 'independent'},
                 title:"Траектория полёта",
                 width: width,
@@ -214,15 +227,6 @@
 
                 annotations: annotations,
             };
-
-            let config = {
-                scrollZoom: true,
-                locale: 'ru',
-                displaylogo: false,
-                responsive: true,
-            }
-
-            Plotly.newPlot("chart", [trajectoryCG, trajectoryFoot, landing,speed], layout ,config);
         }
     </script>
 
