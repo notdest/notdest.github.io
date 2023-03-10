@@ -76,42 +76,7 @@
                 ysFoot.push(ys.at(-1) - Math.cos(curAngle)*centerHeight)
             }
 
-            let annotations = [];
-            let curT        = 0;
-            let annoY       = Math.cos(rampAngle)*centerHeight + Vvert0**2/(2*G) + 0.1;
-            let X0          = -Math.sin(rampAngle)*centerHeight;
-            do{                                                                     // надписи с секундами
-                annotations.push({
-                    x: X0 + curT*Vhor ,
-                    y: annoY,
-                    xref: 'x',
-                    yref: 'y',
-                    text: curT + ' сек.',
-                    showarrow: true,
-                    arrowhead: 0,
-                    ax: 0,
-                    ay: -20
-                });
-                curT += 0.5;
-            }while(curT*Vhor <= CMDistance)
-
-            let annoX   = CMDistance + X0 + 0.1;
-            let H       = Math.ceil(minV**2/(2*G)*2)/2;
-            while(Math.sqrt(2*G*H) <= maxV) {
-                annotations.push({
-                    x: annoX,
-                    y: Math.sqrt(2*G*H) * 3.6,
-                    xref: 'x2',
-                    yref: 'y2',
-                    text: H + ' м',
-                    showarrow: true,
-                    arrowhead: 0,
-                    ax: 20,
-                    ay: 0
-                });
-
-                H += 0.5;
-            }
+            let annotations = getAnnotations(rampAngle, centerHeight, Vvert0, Vhor, minV, maxV, CMDistance);
 
             let trajectoryCG = {
                 x: xs,
@@ -176,6 +141,49 @@
             Plotly.newPlot("chart", [trajectoryCG, trajectoryFoot, landing,speed], layout ,config);
         }
 
+        // Функция рисует на графике метки с секундами и эквивалентной высотой
+        function getAnnotations(rampAngle, centerHeight, Vvert0, Vhor, minV, maxV, CMDistance){
+            let annotations = [];
+            let curT        = 0;
+            let annoY       = Math.cos(rampAngle)*centerHeight + Vvert0**2/(2*G) + 0.1;
+            let X0          = -Math.sin(rampAngle)*centerHeight;
+            do{                                                                     // надписи с секундами
+                annotations.push({
+                    x: X0 + curT*Vhor ,
+                    y: annoY,
+                    xref: 'x',
+                    yref: 'y',
+                    text: curT + ' сек.',
+                    showarrow: true,
+                    arrowhead: 0,
+                    ax: 0,
+                    ay: -20
+                });
+                curT += 0.5;
+            }while(curT*Vhor <= CMDistance)
+
+            let annoX   = CMDistance + X0 + 0.1;
+            let H       = Math.ceil(minV**2/(2*G)*2)/2;
+            while(Math.sqrt(2*G*H) <= maxV) {
+                annotations.push({
+                    x: annoX,
+                    y: Math.sqrt(2*G*H) * 3.6,
+                    xref: 'x2',
+                    yref: 'y2',
+                    text: H + ' м',
+                    showarrow: true,
+                    arrowhead: 0,
+                    ax: 20,
+                    ay: 0
+                });
+
+                H += 0.5;
+            }
+
+            return annotations;
+        }
+
+        // Почти все настройки графика здесь - оси/легенды/заголовки и тд
         function getLayout(width, annotations){
             return {
                 grid: {rows: 2, columns: 1, pattern: 'independent'},
