@@ -42,7 +42,7 @@
 
         function drawCharts(rampAngle,centerHeight,CMDistance,V){
             let steps   = 30;
-            let xs = [], ys = [], xsFoot = [], ysFoot = [], speeds = [], tmpX, curAngle, Vvert,tmpV;
+            let xs = [], ys = [], ts = [], xsFoot = [], ysFoot = [], speeds = [], tmpX, curAngle, Vvert,tmpV;
 
             let Vhor    = V * Math.cos(rampAngle);                              // Горизонтальная и начальная вертикальная скорость
             let Vvert0  = V * Math.sin(rampAngle);
@@ -53,6 +53,7 @@
                 tmpX        = (i/steps)*CMDistance;
                 xs.push( -Math.sin(rampAngle)*centerHeight + tmpX);
                 ys.push(Math.tan(rampAngle)*tmpX - (G/2)*((tmpX**2)/((V*Math.cos(rampAngle))**2)) + Math.cos(rampAngle)*centerHeight);
+                ts.push(Math.round(tmpX/Vhor*100)/100);
 
                 Vvert   = Vvert0 - G*(tmpX/Vhor);
                 tmpV    = Math.sqrt(Vhor**2 + Vvert**2);
@@ -78,6 +79,11 @@
                     color: 'rgb(92, 170, 255)',
                     width: 2,
                 },
+                hovertemplate:  "<b>ЦТ</b><br>" +
+                                "Дальность: %{x:.2f} м<br>" +
+                                "Высота: %{y:.2f} м<br>" +
+                                "Время: %{text} с<extra></extra>",
+                text: ts,
             };
 
             let trajectoryFoot = {
@@ -89,6 +95,11 @@
                     shape: 'spline',
                     color: 'rgb(92, 170, 255)',
                 },
+                hovertemplate:  "<b>Подошва</b><br>" +
+                                "Дальность: %{x:.2f} м<br>" +
+                                "Высота: %{y:.2f} м<br>" +
+                                "Время: %{text} с<extra></extra>",
+                text: ts,
             };
 
             let speed = {
@@ -104,6 +115,11 @@
                 },
                 yaxis: 'y2',
                 xaxis: 'x2',
+                hovertemplate:  "<b>Скорость</b><br>" +
+                                "Скорость: %{y:.2f} км/ч<br>" +
+                                "Дальность: %{x:.2f} м<br>" +
+                                "Время: %{text} с<extra></extra>",
+                text: ts,
             };
 
             let width   = document.getElementById('mainContainer').scrollWidth;
@@ -140,7 +156,7 @@
                 curT += 0.5;
             }while(curT*Vhor <= CMDistance)
 
-            let annoX   = CMDistance + X0 + 0.1;
+            let annoX   = CMDistance + X0 + 0.1;                                    // надписи с метрами
             let H       = Math.ceil(minV**2/(2*G)*2)/2;
             while(Math.sqrt(2*G*H) <= maxV) {
                 annotations.push({
