@@ -37,17 +37,14 @@
 
             document.getElementById('result_v').innerText   = (speed*3.6).toFixed(1) + " км/ч";
 
-            drawCharts(rampAngle,centerHeight,tres*Vhor,speed);
-        }
 
-        function drawCharts(rampAngle,centerHeight,CMDistance,V){
+
+            let CMDistance = tres*Vhor;
+            let V = speed;
+
             let steps   = 30;
-            let xs = [], ys = [], ts = [], xsFoot = [], ysFoot = [], speeds = [], tmpX, curAngle, Vvert,tmpV;
+            let xs = [], ys = [], ts = [], tmpX, curAngle, Vvert;
 
-            let Vhor    = V * Math.cos(rampAngle);                              // Горизонтальная и начальная вертикальная скорость
-            let Vvert0  = V * Math.sin(rampAngle);
-            let minV    = V;
-            let maxV    = Vhor;
 
             for(let i = 0; i <= steps; i++){
                 tmpX        = (i/steps)*CMDistance;
@@ -55,18 +52,11 @@
                 ys.push(Math.tan(rampAngle)*tmpX - (G/2)*((tmpX**2)/((V*Math.cos(rampAngle))**2)) + Math.cos(rampAngle)*centerHeight);
                 ts.push(Math.round(tmpX/Vhor*100)/100);
 
-                Vvert   = Vvert0 - G*(tmpX/Vhor);
-                tmpV    = Math.sqrt(Vhor**2 + Vvert**2);
-                speeds.push(tmpV*3.6 );
-                minV    = Math.min( minV,tmpV);
-                maxV    = Math.max( maxV,tmpV);
-
-                curAngle    = Math.atan(Vvert/Vhor) ;
-                xsFoot.push(xs.at(-1) + Math.sin(curAngle)*centerHeight);
-                ysFoot.push(ys.at(-1) - Math.cos(curAngle)*centerHeight)
+             /* Vvert       = Vvert0 - G*(tmpX/Vhor);
+                curAngle    = Math.atan(Vvert/Vhor) ;*/
             }
 
-            let annotations = getAnnotations(rampAngle, centerHeight, Vvert0, Vhor, minV, maxV, CMDistance);
+            let annotations = [];
 
             let trajectoryCG = {
                 x: xs,
@@ -86,41 +76,6 @@
                 text: ts,
             };
 
-            let trajectoryFoot = {
-                x: xsFoot,
-                y: ysFoot,
-                name: 'Подошва',
-                mode: 'lines',
-                line: {
-                    shape: 'spline',
-                    color: 'rgb(92, 170, 255)',
-                },
-                hovertemplate:  "<b>Подошва</b><br>" +
-                                "Дальность: %{x:.2f} м<br>" +
-                                "Высота: %{y:.2f} м<br>" +
-                                "Время: %{text} с<extra></extra>",
-                text: ts,
-            };
-
-            let speed = {
-                x: xs,
-                y: speeds,
-                mode: 'lines',
-                name: 'Скорость',
-                line: {
-                    shape: 'spline',
-                    dash: 'lines',
-                    color: 'rgb(88, 179, 81)',
-                    width: 2,
-                },
-                yaxis: 'y2',
-                xaxis: 'x2',
-                hovertemplate:  "<b>Скорость</b><br>" +
-                                "Скорость: %{y:.2f} км/ч<br>" +
-                                "Дальность: %{x:.2f} м<br>" +
-                                "Время: %{text} с<extra></extra>",
-                text: ts,
-            };
 
             let width   = document.getElementById('mainContainer').scrollWidth;
             let layout  = getLayout(width, annotations);
@@ -132,58 +87,15 @@
                 responsive: true,
             }
 
-            Plotly.newPlot("chart", [trajectoryCG, trajectoryFoot, speed], layout ,config);
-        }
-
-        // Функция рисует на графике метки с секундами и эквивалентной высотой
-        function getAnnotations(rampAngle, centerHeight, Vvert0, Vhor, minV, maxV, CMDistance){
-            let annotations = [];
-            let curT        = 0;
-            let annoY       = Math.cos(rampAngle)*centerHeight + Vvert0**2/(2*G) + 0.1;
-            let X0          = -Math.sin(rampAngle)*centerHeight;
-            do{                                                                     // надписи с секундами
-                annotations.push({
-                    x: X0 + curT*Vhor ,
-                    y: annoY,
-                    xref: 'x',
-                    yref: 'y',
-                    text: curT + ' сек.',
-                    showarrow: true,
-                    arrowhead: 0,
-                    ax: 0,
-                    ay: -20
-                });
-                curT += 0.5;
-            }while(curT*Vhor <= CMDistance)
-
-            let annoX   = CMDistance + X0 + 0.1;                                    // надписи с метрами
-            let H       = Math.ceil(minV**2/(2*G)*2)/2;
-            while(Math.sqrt(2*G*H) <= maxV) {
-                annotations.push({
-                    x: annoX,
-                    y: Math.sqrt(2*G*H) * 3.6,
-                    xref: 'x2',
-                    yref: 'y2',
-                    text: H + ' м',
-                    showarrow: true,
-                    arrowhead: 0,
-                    ax: 20,
-                    ay: 0
-                });
-
-                H += 0.5;
-            }
-
-            return annotations;
+            Plotly.newPlot("chart", [trajectoryCG], layout ,config);
         }
 
         // Почти все настройки графика здесь - оси/легенды/заголовки и тд
         function getLayout(width, annotations){
             return {
-                grid: {rows: 2, columns: 1, pattern: 'independent'},
                 title:"Траектория полёта",
                 width: width,
-                height: 1.5 * width,
+                height: 0.9 * width,
                 xaxis: {
                     title: {
                         text: "Дистанция(м)",
@@ -202,25 +114,7 @@
                         },
                     },
                 },
-                xaxis2: {
-                    scaleanchor: "x",
-                    title: {
-                        text: "Дистанция(м)",
-                        font: {
-                            size: 14,
-                        },
-                    },
-                },
-                yaxis2: {
-                    title: {
-                        text: "Скорость(км/ч)",
-                        font: {
-                            size: 14,
-                        },
-                    },
-                },
                 dragmode: "pan",
-                legend: {"orientation": "h"},
                 margin: {
                     'l': 30,
                     'r': 10,
