@@ -7,23 +7,24 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="js/plotly-2.17.0.min.js"></script>
     <script type="text/javascript" src="js/plotly-locale-ru-latest.js"></script>
+    <script type="text/javascript" src="js/calculation-functions.js"></script>
+    <script type="text/javascript" src="js/interface-functions.js"></script>
     <script type="text/javascript">
         window.addEventListener("orientationchange", function() {
             setTimeout(calculate, 100);
         }, false);
 
-        var G = 9.807;
 
         function calculate() {
-            let rampAngle       = Number(document.getElementById('rampAngle').value);
-            let speed           = Number(document.getElementById('speed').value);
-            let centerHeight    = Number(document.getElementById('centerHeight').value);
-            let rampHeight      = Number(document.getElementById('rampHeight').value);
+            let rampAngle       = input('rampAngle');
+            let speed           = input('speed');
+            let centerHeight    = input('centerHeight');
+            let rampHeight      = input('rampHeight');
 
-            let lastX           = Number(document.getElementById('lastX').value);
-            let lastY           = Number(document.getElementById('lastY').value);
+            let lastX           = input('lastX');
+            let lastY           = input('lastY');
 
-            rampAngle   = rampAngle * Math.PI/180;
+            rampAngle   = toRadians(rampAngle);
 
             speed       = speed/3.6;
             speed       = Math.sqrt(speed**2 - 2*G*rampHeight);                     // Падение скорости на трамплине
@@ -35,7 +36,7 @@
             let t2      = Vvert0/G + Math.sqrt(2*Hfull/G);
             let tres    = Math.min(t1,t2)
 
-            document.getElementById('result_v').innerText   = (speed*3.6).toFixed(1) + " км/ч";
+            output('result_v', speed*3.6, "км/ч");
 
             drawCharts(rampAngle,centerHeight,tres*Vhor,speed);
         }

@@ -7,23 +7,23 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="js/plotly-2.17.0.min.js"></script>
     <script type="text/javascript" src="js/plotly-locale-ru-latest.js"></script>
+    <script type="text/javascript" src="js/calculation-functions.js"></script>
+    <script type="text/javascript" src="js/interface-functions.js"></script>
     <script type="text/javascript">
         window.addEventListener("orientationchange", function() {
             setTimeout(calculate, 100);
         }, false);
 
-        var G = 9.807;
-
         function calculate() {
-            let rampAngle       = Number(document.getElementById('rampAngle').value);
-            let landingAngle    = Number(document.getElementById('landingAngle').value);
-            let landingDistance = Number(document.getElementById('landingDistance').value);
-            let landingLevel    = Number(document.getElementById('landingLevel').value);
-            let rampHeight      = Number(document.getElementById('rampHeight').value);
-            let centerHeight    = Number(document.getElementById('centerHeight').value);
+            let rampAngle       = input('rampAngle');
+            let landingAngle    = input('landingAngle');
+            let landingDistance = input('landingDistance');
+            let landingLevel    = input('landingLevel');
+            let rampHeight      = input('rampHeight');
+            let centerHeight    = input('centerHeight');
 
-            rampAngle       = rampAngle    * Math.PI/180;
-            landingAngle    = landingAngle * Math.PI/180;
+            rampAngle       = toRadians(rampAngle);
+            landingAngle    = toRadians(landingAngle);
 
             // центр тежести пролетает чуть больший путь, траекторию ищем для него
             let x = landingDistance + Math.sin(rampAngle)*centerHeight + Math.sin(landingAngle)*centerHeight;
@@ -42,11 +42,11 @@
             let hitSpeed    = finalSpeed * Math.sin( -finalAngle - landingAngle);               // скорость по нормали к приземлению
             let hit         = (hitSpeed**2/(2*G)) * (2/(3 - Math.cos(landingAngle)))            // вычисляем высоту падения, и корректируем с учетом угла силы тяжести
 
-            document.getElementById('result_v').innerText   = (V*3.6).toFixed(1)            + " км/ч";
-            document.getElementById('result_vo').innerText  = (footV*3.6).toFixed(1)        + " км/ч";
-            document.getElementById('result_hit').innerText = hit.toFixed(1)                + " м";
-            document.getElementById('result_t').innerText   = t.toFixed(1)                  + " с";
-            document.getElementById('result_vf').innerText  = (finalSpeed*3.6).toFixed(1)   + " км/ч";
+            output('result_v',  V*3.6,          "км/ч");
+            output('result_vo', footV*3.6,      "км/ч, (высота разгонки — "+ speedToHeight(footV).toFixed(1) +" м)");
+            output('result_hit',hit,            "м");
+            output('result_t',  t,              "с");
+            output('result_vf', finalSpeed*3.6, "км/ч");
 
             drawCharts(rampAngle,landingAngle,centerHeight,x,V);
         }
