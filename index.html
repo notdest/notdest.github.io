@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Калькулятор трамплина</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
     <script type="text/javascript" src="js/plotly-2.17.0.min.js"></script>
     <script type="text/javascript" src="js/plotly-locale-ru-latest.js"></script>
     <script type="text/javascript" src="js/calculation-functions.js"></script>
@@ -295,30 +296,48 @@
     параметры полёта. На соседней вкладке есть калькулятор, который наоборот считает полёт для известной скорости.</p>
     <h2 class="mt-5">Ввод параметров</h2>
     <form>
-        <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-            <label for="rampAngle" class="form-label">Угол вылета в градусах</label>
-            <input type="number" class="form-control" id="rampAngle" value="54">
+
+        <div class="block">
+            <h5 class="mb-3">Геометрия вылета</h4>
+            <div class="mb-3">
+                <label for="rampAngle" class="form-label">Угол вылета в градусах</label>
+                <input type="number" class="form-control" id="rampAngle" value="54">
+            </div>
+            <div class="mb-3">
+                <label for="rampHeight" class="form-label">Высота кромки вылета над основанием, где измеряем скорость, метры</label>
+                <input type="number" class="form-control" id="rampHeight" value="2">
+            </div>
         </div>
-        <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-            <label for="landingAngle" class="form-label">Угол приземления в градусах</label>
-            <input type="number" class="form-control" id="landingAngle" value="20">
+
+        <div class="block">
+            <h5 class="mb-3">Ближняя точка приземления</h4>
+            <div class="mb-3">
+                <label for="landingAngle" class="form-label">Угол приземления в градусах</label>
+                <input type="number" class="form-control" id="landingAngle" value="20">
+            </div>
+            <div class="mb-3">
+                <label for="landingDistance" class="form-label">Расстояние по горизонтали от вылета до приземления, метры</label>
+                <input type="number" class="form-control" id="landingDistance" value="5">
+            </div>
+            <div class="mb-3">
+                <label for="landingLevel" class="form-label">Высота точки приземления относительно точки вылета, метры</label>
+                <input type="number" class="form-control" id="landingLevel" value="-1">
+                <div class="form-text">Отрицательно если приземление ниже</div>
+            </div>
         </div>
-        <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-            <label for="landingDistance" class="form-label">Расстояние по горизонтали от вылета до приземления, метры</label>
-            <input type="number" class="form-control" id="landingDistance" value="5">
+
+        <div class="mb-3">
+            <a class="expand_link" data-bs-toggle="collapse" href="#bike_geometry" aria-expanded="false" aria-controls="bike_geometry">
+                Геометрия велосипеда
+            </a>
         </div>
-        <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-            <label for="landingLevel" class="form-label">Высота точки приземления относительно точки вылета, метры</label>
-            <input type="number" class="form-control" id="landingLevel" value="-1">
-            <div class="form-text">Отрицательно если приземление ниже</div>
-        </div>
-        <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-            <label for="rampHeight" class="form-label">Высота кромки вылета над основанием, где измеряем скорость, метры</label>
-            <input type="number" class="form-control" id="rampHeight" value="2">
-        </div>
-        <div class="mb-3 col-md-9 col-lg-8 col-xl-6">
-            <label for="centerHeight" class="form-label">Высота центра тяжести от покрытия(м)</label>
-            <input type="number" class="form-control" id="centerHeight" value="1">
+
+        <div class="block collapse" id="bike_geometry">
+            <h5 class="mb-3">Геометрия велосипеда</h4>
+            <div class="mb-3">
+                <label for="centerHeight" class="form-label">Высота центра тяжести от покрытия(м)</label>
+                <input type="number" class="form-control" id="centerHeight" value="1">
+            </div>
         </div>
         <button type="button" class="btn btn-primary" onclick="calculate();">Вычислить</button>
     </form>

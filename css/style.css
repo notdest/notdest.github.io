@@ -1,0 +1,12 @@
+
+.block {
+    border:         2px solid black;
+    border-radius:  7px;
+    padding:        1em;
+    max-width:      700px;
+    margin-bottom:  1em;
+}
+
+.expand_link {
+    text-decoration: underline dotted;
+}
