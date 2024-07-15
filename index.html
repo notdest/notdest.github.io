@@ -16,40 +16,64 @@
         }, false);
 
         function calculate() {
-            let rampAngle       = input('rampAngle');
-            let landingAngle    = input('landingAngle');
-            let landingDistance = input('landingDistance');
-            let landingLevel    = input('landingLevel');
-            let rampHeight      = input('rampHeight');
-            let centerHeight    = input('centerHeight');
+            let rampAngle       = toRadians(input('rampAngle'));
+            let rampHeight      = input('rampHeight')/100;
+            let landingAngle    = toRadians(input('landingAngle'));
+            let landingDistance = input('landingDistance')/100;
+            let landingLevel    = input('landingLevel')/100;
+            let centerHeight    = input('centerHeight')/100;
 
-            rampAngle       = toRadians(rampAngle);
-            landingAngle    = toRadians(landingAngle);
-
-            // центр тежести пролетает чуть больший путь, траекторию ищем для него
+            // центр тяжести пролетает чуть больший путь, траекторию ищем для него
             let x = landingDistance + Math.sin(rampAngle)*centerHeight + Math.sin(landingAngle)*centerHeight;
             let y = landingLevel    - Math.cos(rampAngle)*centerHeight + Math.cos(landingAngle)*centerHeight;
 
-            // Сначала вычислим время, через падение с высоты, мне так проще
-            let h = x * Math.tan(rampAngle) - y;        // Высота от точки приземления, до точки где мы оказались бы без гравитации
-            let t = Math.sqrt(2*h/G);                   // Время падения с этой высоты, оно же общее время полёта
+            let t = getTime(x,y,rampAngle);
             // Потом из времени скорость
             let V = (x/t)/Math.cos(rampAngle);          // требуемую горизонтальную скорость делим на cos, получаем скорость на кромке
 
-            let footV = Math.sqrt(V**2 + 2*G*rampHeight); // Скорость у основания - добавили энергию чтобы забраться на трамплин
+            let footV = addHeight(V,rampHeight);
             let finalSpeed = Math.sqrt( (V*Math.cos(rampAngle))**2 + (V*Math.sin(rampAngle)-G*t)**2 );
+            let hit = getHit(V,t,rampAngle,landingAngle);
 
-            let finalAngle  = Math.atan((V*Math.sin(rampAngle) - G*t)/(V*Math.cos(rampAngle))); //угол полёта в конце
-            let hitSpeed    = finalSpeed * Math.sin( -finalAngle - landingAngle);               // скорость по нормали к приземлению
-            let hit         = (hitSpeed**2/(2*G)) * (2/(3 - Math.cos(landingAngle)))            // вычисляем высоту падения, и корректируем с учетом угла силы тяжести
+            // ------------ далее вторая траектория
 
-            output('result_v',  V*3.6,          "км/ч");
-            output('result_vo', footV*3.6,      "км/ч, (высота разгонки — "+ speedToHeight(footV).toFixed(1) +" м)");
-            output('result_hit',hit,            "м");
-            output('result_t',  t,              "с");
-            output('result_vf', finalSpeed*3.6, "км/ч");
+            let landingAngle2    = toRadians(input('landingAngle2'));
+            let landingDistance2 = input('landingDistance2')/100;
+            let landingLevel2    = input('landingLevel2')/100;
+
+            // центр тяжести пролетает чуть больший путь, траекторию ищем для него
+            let x2 = landingDistance + landingDistance2 + Math.sin(rampAngle)*centerHeight + Math.sin(landingAngle2)*centerHeight;
+            let y2 = landingLevel - landingLevel2    - Math.cos(rampAngle)*centerHeight + Math.cos(landingAngle2)*centerHeight;
+
+            let t2 = getTime(x2,y2,rampAngle);
+            let V2 = (x2/t2)/Math.cos(rampAngle);          // требуемую горизонтальную скорость делим на cos, получаем скорость на кромке
+            let footV2 = addHeight(V2,rampHeight);
+            let finalSpeed2 = Math.sqrt( (V2*Math.cos(rampAngle))**2 + (V2*Math.sin(rampAngle)-G*t2)**2 );
+            let hit2 = getHit(V2,t2,rampAngle,landingAngle2);
+
+            outputRange('result_base_speed', toKMH(footV), toKMH(footV2), "км/ч");
+            outputRange('result_acceleration_ramp_height', speedToHeight(footV), speedToHeight(footV2), "м");
+            outputRange('result_speed',  toKMH(V), toKMH(V2), "км/ч");
+            output('result_minimal_speed', toKMH(addHeight(0,rampHeight)), "км/ч");
+            outputRange('result_hit', hit, hit2, "м");
+            outputRange('result_time',  t, t2, "с");
+            outputRange('result_final_speed', toKMH(finalSpeed), toKMH(finalSpeed2), "км/ч");
 
             drawCharts(rampAngle,landingAngle,centerHeight,x,V);
+        }
+
+        function getTime(x,y,rampAngle) {
+            let h = x * Math.tan(rampAngle) - y;        // Высота от точки приземления, до точки где мы оказались бы без гравитации
+            return Math.sqrt(2*h/G);                    // Время падения с этой высоты, оно же общее время полёта
+        }
+
+        function getHit(speed, time, rampAngle, landingAngle) {
+            let horizontalSpeed = speed*Math.cos(rampAngle);
+            let finalVerticalSpeed = speed*Math.sin(rampAngle) - G*time;
+            let finalAngle = Math.atan( finalVerticalSpeed / horizontalSpeed );         //угол полёта в конце
+            let finalSpeed = Math.sqrt(horizontalSpeed**2 + finalVerticalSpeed**2);
+            let hitSpeed = finalSpeed * Math.sin( -finalAngle - landingAngle);          // скорость по нормали к приземлению
+            return (hitSpeed**2/(2*G)) * (2/(3 - Math.cos(landingAngle)))               // вычисляем высоту падения, и корректируем с учетом угла силы тяжести
         }
 
         function drawCharts(rampAngle,landingAngle,centerHeight,CMDistance,V){
@@ -301,11 +325,11 @@
             <h5 class="mb-3">Геометрия вылета</h4>
             <div class="mb-3">
                 <label for="rampAngle" class="form-label">Угол вылета в градусах</label>
-                <input type="number" class="form-control" id="rampAngle" value="54">
+                <input type="number" class="form-control" id="rampAngle" value="50">
             </div>
             <div class="mb-3">
-                <label for="rampHeight" class="form-label">Высота кромки вылета над основанием, где измеряем скорость, метры</label>
-                <input type="number" class="form-control" id="rampHeight" value="2">
+                <label for="rampHeight" class="form-label">Высота кромки вылета над основанием, где измеряем скорость, сантиметры</label>
+                <input type="number" class="form-control" id="rampHeight" value="215">
             </div>
         </div>
 
@@ -313,16 +337,32 @@
             <h5 class="mb-3">Ближняя точка приземления</h4>
             <div class="mb-3">
                 <label for="landingAngle" class="form-label">Угол приземления в градусах</label>
-                <input type="number" class="form-control" id="landingAngle" value="20">
+                <input type="number" class="form-control" id="landingAngle" value="35">
             </div>
             <div class="mb-3">
-                <label for="landingDistance" class="form-label">Расстояние по горизонтали от вылета до приземления, метры</label>
-                <input type="number" class="form-control" id="landingDistance" value="5">
+                <label for="landingDistance" class="form-label">Расстояние по горизонтали от вылета до приземления, сантиметры</label>
+                <input type="number" class="form-control" id="landingDistance" value="326">
             </div>
             <div class="mb-3">
-                <label for="landingLevel" class="form-label">Высота точки приземления относительно точки вылета, метры</label>
-                <input type="number" class="form-control" id="landingLevel" value="-1">
+                <label for="landingLevel" class="form-label">Высота точки приземления относительно точки вылета, сантиметры</label>
+                <input type="number" class="form-control" id="landingLevel" value="34">
                 <div class="form-text">Отрицательно если приземление ниже</div>
+            </div>
+        </div>
+
+        <div class="block">
+            <h5 class="mb-3">Дальняя точка приземления</h4>
+            <div class="mb-3">
+                <label for="landingAngle2" class="form-label">Угол приземления в градусах</label>
+                <input type="number" class="form-control" id="landingAngle2" value="22">
+            </div>
+            <div class="mb-3">
+                <label for="landingDistance2" class="form-label">Расстояние по горизонтали от ближней до дальней точки приземления, сантиметры</label>
+                <input type="number" class="form-control" id="landingDistance2" value="267">
+            </div>
+            <div class="mb-3">
+                <label for="landingLevel2" class="form-label">Расстояние по вертикали от ближней до дальней точки приземления, сантиметры</label>
+                <input type="number" class="form-control" id="landingLevel2" value="175">
             </div>
         </div>
 
@@ -335,8 +375,8 @@
         <div class="block collapse" id="bike_geometry">
             <h5 class="mb-3">Геометрия велосипеда</h4>
             <div class="mb-3">
-                <label for="centerHeight" class="form-label">Высота центра тяжести от покрытия(м)</label>
-                <input type="number" class="form-control" id="centerHeight" value="1">
+                <label for="centerHeight" class="form-label">Высота центра тяжести от покрытия (см)</label>
+                <input type="number" class="form-control" id="centerHeight" value="100">
             </div>
         </div>
         <button type="button" class="btn btn-primary" onclick="calculate();">Вычислить</button>
@@ -344,11 +384,13 @@
 
     <h2 class="mt-5">Результаты</h2>
 
-    <div class="mt-3"> Минимальная скорость на кромке: <span id="result_v"></span></div>
-    <div class="mt-3"> Минимальная скорость у основания: <span id="result_vo"></span></div>
+    <div class="mt-3"> Скорость у основания: <span id="result_base_speed"></span></div>
+    <div class="mt-3"> Высота разгонки над основанием: <span id="result_acceleration_ramp_height"></span></div>
+    <div class="mt-3"> Скорость на кромке: <span id="result_speed"></span></div>
+    <div class="mt-3"> Скорость, чтобы просто заехать: <span id="result_minimal_speed"></span></div>
     <div class="mt-3"> Удар в ноги: <span id="result_hit"></span></div>
-    <div class="mt-3"> Скорость перед приземлением: <span id="result_vf"></span></div>
-    <div class="mt-3 mb-3"> Время полёта: <span id="result_t"></span></div>
+    <div class="mt-3"> Скорость перед приземлением: <span id="result_final_speed"></span></div>
+    <div class="mt-3 mb-3"> Время полёта: <span id="result_time"></span></div>
 
     <div id="chart" class="mb-5"></div>
 
