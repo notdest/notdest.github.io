@@ -59,7 +59,7 @@
             outputRange('result_time',  t, t2, "с");
             outputRange('result_final_speed', toKMH(finalSpeed), toKMH(finalSpeed2), "км/ч");
 
-            drawCharts(rampAngle,landingAngle,centerHeight,x,V);
+            drawCharts(rampAngle,landingAngle,centerHeight,x,V,V2, x2,landingAngle2);
         }
 
         function getTime(x,y,rampAngle) {
@@ -119,22 +119,32 @@
             }
         }
 
-        function drawCharts(rampAngle,landingAngle,centerHeight,CMDistance,V){
+        function drawCharts(rampAngle,landingAngle,centerHeight,CMDistance,V,V2, CMDistance2,landingAngle2){
             let tr = new Trajectory(V, CMDistance, rampAngle, centerHeight);
             let trFoot = new TrajectoryFoot(tr, rampAngle, landingAngle, centerHeight)
 
 
+            let lines = [];
+
+            let colorMin = 'rgb(103, 196, 106)';
+            lines.push( lineCenterGravity(tr, colorMin) );
+            lines.push( lineFoot(trFoot, colorMin) );
+            lines.push( landingLine(trFoot.xs.at(-1), trFoot.ys.at(-1), landingAngle) );
+            lines.push( lineSpeed(tr, colorMin) )
+
+            let tr2 = new Trajectory(V2, CMDistance2, rampAngle, centerHeight);
+            let trFoot2 = new TrajectoryFoot(tr2, rampAngle, landingAngle2, centerHeight)
+
+            let colorMax = 'rgb(92, 170, 255)';
+            lines.push( lineCenterGravity(tr2,colorMax) );
+            lines.push( lineFoot(trFoot2, colorMax) );
+            lines.push( landingLine(trFoot2.xs.at(-1), trFoot2.ys.at(-1), landingAngle2) );
+            lines.push( lineSpeed(tr2, colorMax) )
+
             let minV = Math.min.apply(null, tr.speeds);
-            let maxV = Math.max.apply(null, tr.speeds);
-            let Vhor    = V * Math.cos(rampAngle);                              // Горизонтальная и начальная вертикальная скорость
-            let Vvert0  = V * Math.sin(rampAngle);
-            let annotations = getAnnotations(rampAngle, centerHeight, Vvert0, Vhor, minV, maxV, CMDistance);
-
-            let trajectoryCG = lineCenterGravity(tr);
-            let trajectoryFoot = lineFoot(trFoot);
-
-            let landing = landingLine(trFoot.xs.at(-1), trFoot.ys.at(-1), landingAngle);
-            let speed = lineSpeed(tr);
+            let maxV = Math.max.apply(null, tr2.speeds);
+            let xMax = Math.max.apply(null, tr2.xs);
+            let annotations = getAnnotations(minV, maxV, xMax);
 
             let width   = document.getElementById('mainContainer').scrollWidth;
             let layout  = getLayout(width, annotations);
@@ -146,10 +156,10 @@
                 responsive: true,
             }
 
-            Plotly.newPlot("chart", [trajectoryCG, trajectoryFoot, landing,speed], layout ,config);
+            Plotly.newPlot("chart", lines, layout ,config);
         }
 
-        function lineSpeed(trajectory) {
+        function lineSpeed(trajectory,color) {
             return {
                 x: trajectory.xs,
                 y: trajectory.speeds.map(toKMH),
@@ -158,7 +168,7 @@
                 line: {
                     shape: 'spline',
                     dash: 'lines',
-                    color: 'rgb(88, 179, 81)',
+                    color: color,
                     width: 2,
                 },
                 yaxis: 'y2',
@@ -171,7 +181,7 @@
             };
         }
 
-        function lineCenterGravity(trajectory) {
+        function lineCenterGravity(trajectory, color) {
             return {
                 x: trajectory.xs,
                 y: trajectory.ys,
@@ -180,7 +190,7 @@
                 line: {
                     shape: 'spline',
                     dash: 'dot',
-                    color: 'rgb(92, 170, 255)',
+                    color: color,
                     width: 2,
                 },
                 hovertemplate:  "<b>ЦТ</b><br>" +
@@ -191,7 +201,7 @@
             };
         }
 
-        function lineFoot(trajectory) {
+        function lineFoot(trajectory, color) {
             return {
                 x: trajectory.xs,
                 y: trajectory.ys,
@@ -199,7 +209,7 @@
                 mode: 'lines',
                 line: {
                     shape: 'spline',
-                    color: 'rgb(92, 170, 255)',
+                    color: color,
                 },
                 hovertemplate:  "<b>Подошва</b><br>" +
                                 "Дальность: %{x:.2f} м<br>" +
@@ -218,33 +228,16 @@
                 name: 'Приземление',
                 showlegend: false,
                 line: {
-                    color: 'rgb(243, 71, 5)',
+                    color: 'rgb(99, 42, 15)',
                 },
             };
         }
 
         // Функция рисует на графике метки с секундами и эквивалентной высотой
-        function getAnnotations(rampAngle, centerHeight, Vvert0, Vhor, minV, maxV, CMDistance){
+        function getAnnotations( minV, maxV, xMax){
             let annotations = [];
-            let curT        = 0;
-            let annoY       = Math.cos(rampAngle)*centerHeight + Vvert0**2/(2*G) + 0.1;
-            let X0          = -Math.sin(rampAngle)*centerHeight;
-            do{                                                                     // надписи с секундами
-                annotations.push({
-                    x: X0 + curT*Vhor ,
-                    y: annoY,
-                    xref: 'x',
-                    yref: 'y',
-                    text: curT + ' сек.',
-                    showarrow: true,
-                    arrowhead: 0,
-                    ax: 0,
-                    ay: -20
-                });
-                curT += 0.5;
-            }while(curT*Vhor <= CMDistance)
 
-            let annoX   = CMDistance + X0 + 0.1;                                    // надписи с метрами
+            let annoX   = xMax + 0.1;                                    // надписи с метрами
             let H       = Math.ceil(minV**2/(2*G)*2)/2;
             while(Math.sqrt(2*G*H) <= maxV) {
                 annotations.push({
@@ -428,7 +421,7 @@
     <div class="mt-3"> Скорость у основания: <span id="result_base_speed"></span></div>
     <div class="mt-3"> Скорость у основания, чтобы просто заехать: <span id="result_minimal_speed"></span></div>
     <div class="mt-3"> Высота разгонки над основанием: <span id="result_acceleration_ramp_height"></span></div>
-    <div class="mt-3"> Удар в ноги: <span id="result_hit"></span></div>
+    <div class="mt-3"> Удар в ноги на приземлении: <span id="result_hit"></span></div>
     <div class="mt-3"> Скорость на кромке: <span id="result_speed"></span></div>
     <div class="mt-3"> Скорость перед приземлением: <span id="result_final_speed"></span></div>
     <div class="mt-3 mb-3"> Время полёта: <span id="result_time"></span></div>
