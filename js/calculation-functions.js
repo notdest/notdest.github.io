@@ -20,3 +20,12 @@ function addHeight(speed, height){
 function toKMH(speed){
     return speed*3.6;
 }
+
+function round(num, precision){
+    let multiplier = 10 ** precision;
+    return Math.round( num * multiplier)/multiplier;
+}
+
+function vectorLength(a, b) {
+    return Math.sqrt(a**2 + b**2);
+}
