@@ -15,6 +15,11 @@
             setTimeout(calculate, 100);
         }, false);
 
+        function firstLoad() {
+            processURL();
+            calculate();
+        }
+
         function calculate() {
             let rampAngle       = toRadians(input('rampAngle'));
             let rampHeight      = input('rampHeight')/100;
@@ -58,6 +63,8 @@
             outputRange('result_hit', hit, hit2, "м");
             outputRange('result_time',  t, t2, "с");
             outputRange('result_final_speed', toKMH(finalSpeed), toKMH(finalSpeed2), "км/ч");
+
+            document.getElementById("link").value = generateLink();
 
             drawCharts(rampAngle,landingAngle,centerHeight,x,V,V2, x2,landingAngle2);
         }
@@ -112,7 +119,6 @@
 
             let count = trajectory.xs.length;
             for (let i=0; i<count; i++){
-                console.log(i/(count-1));
                 let currentAngle = rampAngle + (i/(count-1))*(-landingAngle - rampAngle);
                 this.xs.push(trajectory.xs[i] + Math.sin(currentAngle)*centerHeight );
                 this.ys.push(trajectory.ys[i] - Math.cos(currentAngle)*centerHeight);
@@ -337,7 +343,7 @@
     <noscript><div><img src="https://mc.yandex.ru/watch/91957766" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <!-- /Yandex.Metrika counter -->
 </head>
-<body class="bg-light" onload="calculate()">
+<body class="bg-light" onload="firstLoad()">
 <div class="container-sm" id="mainContainer">
 
     <ul class="nav nav-tabs">
@@ -356,7 +362,7 @@
     <form>
 
         <div class="block">
-            <h5 class="mb-3">Геометрия вылета</h4>
+            <h5 class="mb-3">Геометрия вылета</h5>
             <div class="mb-3">
                 <label for="rampAngle" class="form-label">Угол вылета в градусах</label>
                 <input type="number" class="form-control" id="rampAngle" value="50">
@@ -368,7 +374,7 @@
         </div>
 
         <div class="block">
-            <h5 class="mb-3">Ближняя точка приземления</h4>
+            <h5 class="mb-3">Ближняя точка приземления</h5>
             <div class="mb-3">
                 <label for="landingAngle" class="form-label">Угол приземления в градусах</label>
                 <input type="number" class="form-control" id="landingAngle" value="35">
@@ -385,7 +391,7 @@
         </div>
 
         <div class="block">
-            <h5 class="mb-3">Дальняя точка приземления</h4>
+            <h5 class="mb-3">Дальняя точка приземления</h5>
             <div class="mb-3">
                 <label for="landingAngle2" class="form-label">Угол приземления в градусах</label>
                 <input type="number" class="form-control" id="landingAngle2" value="22">
@@ -400,19 +406,19 @@
             </div>
         </div>
 
-        <div class="mb-3">
-            <a class="expand_link" data-bs-toggle="collapse" href="#bike_geometry" aria-expanded="false" aria-controls="bike_geometry">
-                Геометрия велосипеда
-            </a>
-        </div>
+        <div class="block">
+            <h5 class="mb-3">Остальное</h5>
+            <div class="mb-3">
+                <label for="comment" class="form-label">Комментарий (сохраняется в ссылке на результат)</label>
+                <textarea class="form-control" id="comment" rows="3"></textarea>
+            </div>
 
-        <div class="block collapse" id="bike_geometry">
-            <h5 class="mb-3">Геометрия велосипеда</h4>
             <div class="mb-3">
                 <label for="centerHeight" class="form-label">Высота центра тяжести от покрытия (см)</label>
                 <input type="number" class="form-control" id="centerHeight" value="100">
             </div>
         </div>
+
         <button type="button" class="btn btn-primary" onclick="calculate();">Вычислить</button>
     </form>
 
@@ -425,8 +431,16 @@
     <div class="mt-3"> Скорость на кромке: <span id="result_speed"></span></div>
     <div class="mt-3"> Скорость перед приземлением: <span id="result_final_speed"></span></div>
     <div class="mt-3 mb-3"> Время полёта: <span id="result_time"></span></div>
+    <div class="mb-4 mt-4">
+        <label for="link" class="form-label">Ссылка на результат:</label>
+        <div class="input-group" style="max-width: 700px;">
+            <button class="btn btn-outline-secondary" type="button" onclick="copyInput('link')">Копировать</button>
+            <input type="text" class="form-control" id="link">
+        </div>
+        <div class="form-text">Её можно обернуть в QR-код или сервис сокращений, и разместить рядом с трамплином или на картах</div>
+    </div>
 
-    <div id="chart" class="mb-5"></div>
+    <div id="chart" class="mb-5 mt-4"></div>
 
     <h2 class="mt-5">Описание</h2>
     <p>Если график криво отрисовался - пошевели его, он обновится. Метры справа на графике скорости - это эквивалентное
