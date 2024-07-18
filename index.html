@@ -15,6 +15,11 @@
             setTimeout(calculate, 100);
         }, false);
 
+        function firstLoad() {
+            processURL();
+            calculate();
+        }
+
         function calculate() {
             let rampAngle       = toRadians(input('rampAngle'));
             let rampHeight      = input('rampHeight')/100;
@@ -338,7 +343,7 @@
     <noscript><div><img src="https://mc.yandex.ru/watch/91957766" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <!-- /Yandex.Metrika counter -->
 </head>
-<body class="bg-light" onload="calculate()">
+<body class="bg-light" onload="firstLoad()">
 <div class="container-sm" id="mainContainer">
 
     <ul class="nav nav-tabs">
@@ -432,6 +437,7 @@
             <button class="btn btn-outline-secondary" type="button" onclick="copyInput('link')">Копировать</button>
             <input type="text" class="form-control" id="link">
         </div>
+        <div class="form-text">Её можно обернуть в QR-код или сервис сокращений, и разместить рядом с трамплином или на картах</div>
     </div>
 
     <div id="chart" class="mb-5 mt-4"></div>

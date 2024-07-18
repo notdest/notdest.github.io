@@ -50,3 +50,13 @@ function copyInput(id){
         console.log("Чо-то не смогли скопировать, бывает, давай сам");
     });
 }
+
+function processURL() {
+    const queryString = location.search;
+    if (queryString) {
+        const params = new URLSearchParams(queryString);
+        for (const [key, value] of params) {
+            document.getElementById(key).value = value;
+        }
+    }
+}
