@@ -17,7 +17,7 @@ function generateLink() {
 
     let link = window.location.href;
     let pos = link.indexOf(".html");
-    if (pos) {
+    if ( pos>0 ) {
         link = link.substring(0,pos+5) + "?";
     }else {
         link += "index.html"
