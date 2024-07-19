@@ -20,7 +20,7 @@ function generateLink() {
     if ( pos>0 ) {
         link = link.substring(0,pos+5) + "?";
     }else {
-        link += "index.html"
+        link += "index.html?"
     }
 
     for (let i=0; i<inputs.length; i++){
